@@ -10,8 +10,8 @@
 * `echo ... | python -m sort`
 * `python -m sort filename [filename...]`
 
-###Запуск тестов
+### Запуск тестов
 * `python -m pytest`
 
-###Запуск линтера
+### Запуск линтера
 * `flake8 sort`
