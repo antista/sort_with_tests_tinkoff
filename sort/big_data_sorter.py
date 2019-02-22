@@ -97,13 +97,11 @@ class Big_Data_Sorter():
 
     def make_result_file(self):  # pragma: no cover
         os.chdir(self.tmp_dir)
-        result_file = open(self.result_file, 'r')
-        os.chdir(self.start_dir)
-        input_file = open(config.RESULT_FILE_NAME, 'w')
-        for line in result_file:
-            input_file.write(line)
-        input_file.close()
-        result_file.close()
+        with open(self.result_file, 'r') as result_file:
+            os.chdir(self.start_dir)
+            with open(config.RESULT_FILE_NAME, 'w') as input_file:
+                for line in result_file:
+                    input_file.write(line)
         self.result_file = config.RESULT_FILE_NAME
 
     def print_res(self):  # pragma: no cover
