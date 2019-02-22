@@ -1,3 +1,4 @@
+import heapq
 import os
 import sys
 import tempfile
@@ -73,47 +74,19 @@ class Big_Data_Sorter():
         self.tmp_file_names.append(result_file.name)
         self.tmp_files_count += 1
 
-        files, strings = [], []
+        files = []
+
         for i in range(count):
-            files.append(list(reversed(open(self.tmp_file_names[self.already_merged + i], 'r').readlines())))
-            try:
-                current_string = files[i].pop()
-                current_string = current_string.replace('\n', '')
-                strings.append((current_string, i))
-            except:  # pragma: no cover
-                strings.append((None, i))
-        first_string = True
-        while len(strings) > 0:
-            if not first_string:
-                result_file.write('\n')
-            else:
-                first_string = False
-
-            id_smaller_string = self.get_smaller_string_id(strings)
-            if id_smaller_string == 'END':
-                break
-
-            result_file.write(strings[id_smaller_string][0])
-            try:
-                next_string = files[id_smaller_string].pop()
-                next_string = next_string.replace('\n', '')
-                strings[id_smaller_string] = (next_string, id_smaller_string)
-            except:
-                strings[id_smaller_string] = (None, id_smaller_string)
-
+            with open(self.tmp_file_names[self.already_merged + i], 'r') as f:
+                tmp = list(reversed([line.replace('\n', '') for line in f.readlines()]))
+                tmp.sort()
+                files.append(tmp)
+        result = heapq.merge(*files)
+        for line in result:
+            result_file.write(line)
+            result_file.write('\n')
         self.result_file = result_file.name
         result_file.close()
-
-    def get_smaller_string_id(self, strings):
-        tmp_arr = []
-        for string in strings:
-            if string[0] is None:
-                continue
-            tmp_arr.append([string[0], string[1]])
-        if not tmp_arr:
-            return 'END'
-        tmp_arr.sort()
-        return int(tmp_arr[0][1])
 
     def delete_tmp_dir(self):  # pragma: no cover
         self.make_result_file()

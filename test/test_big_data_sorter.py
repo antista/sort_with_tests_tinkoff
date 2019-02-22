@@ -73,9 +73,4 @@ def test_merge_many_tmp_files(sorter_big_file, mocker, clean_files):
     clean_files
 
 
-@pytest.mark.parametrize(('strings', 'result'),
-                         [([('qwert', 1), ('test', 2), ('ufo', 3), ('kek', 5), ('abc', 4)], 4),
-                          ([('abcd', 1), ('abc', 2)], 2),
-                          ([('7', 3), ('7', 2), ('7', 1), ('kek', 5), (None, 4)], 1)])
-def test_get_smaller_string_id(sorter_one_file, strings, result):
-    assert sorter_one_file.get_smaller_string_id(strings) == result
+
