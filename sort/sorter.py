@@ -16,7 +16,7 @@ def read_files(filenames):
     for file in filenames:
         with open(file, 'r') as f:
             for line in f.readlines():
-                lines.append(line.replace('\n', ''))
+                lines.append(line)
     return lines
 
 
@@ -25,7 +25,7 @@ def sort(filenames):
         lines = read_files(filenames)
         lines.sort()
         for line in lines:
-            print(line)  # pragma: no cover
+            print(line,end='')  # pragma: no cover
     else:
         sorter = big_data_sorter.Big_Data_Sorter(filenames)
         sorter.sort()

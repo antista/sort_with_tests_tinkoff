@@ -8,7 +8,6 @@ from sort import config
 class Big_Data_Sorter():
     def __init__(self, filenames):
         self.filenames = filenames
-        self.tmp_files_count = 0
         self.tmp_file_names = []
         self.start_dir = os.getcwd()
         self.tmp_dir = tempfile.mkdtemp()
@@ -47,8 +46,7 @@ class Big_Data_Sorter():
         os.chdir(self.start_dir)
 
     def process_tmp_file(self, text):
-        with open(str(self.tmp_files_count) + ".txt", 'w') as tmp_file:
-            self.tmp_files_count += 1
+        with open(str(len(self.tmp_file_names)) + ".tmp", 'w') as tmp_file:
             self.tmp_file_names.append(tmp_file.name)
             tmp_text = self.sort_text(text)
             tmp_file.write(tmp_text)
@@ -70,9 +68,8 @@ class Big_Data_Sorter():
             os.chdir(self.start_dir)
 
     def merge_part_of_tmp_files(self, count):
-        result_file = open(str(self.tmp_files_count) + ".txt", 'w')
+        result_file = open(str(len(self.tmp_file_names)) + ".txt", 'w')
         self.tmp_file_names.append(result_file.name)
-        self.tmp_files_count += 1
 
         files = []
 
