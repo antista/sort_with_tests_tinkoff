@@ -1,4 +1,3 @@
-import pytest
 from sort import big_data_sorter
 
 

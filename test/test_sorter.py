@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from sort import sorter, big_data_sorter, config
 
