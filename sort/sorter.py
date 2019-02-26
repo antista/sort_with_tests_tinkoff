@@ -25,7 +25,7 @@ def sort(filenames):
         lines = read_files(filenames)
         lines.sort()
         for line in lines:
-            print(line,end='')  # pragma: no cover
+            print(line, end='')  # pragma: no cover
     else:
         sorter = big_data_sorter.Big_Data_Sorter(filenames)
         sorter.sort()

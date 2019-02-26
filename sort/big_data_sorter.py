@@ -1,6 +1,5 @@
-import heapq
-import os
 import sys
+import heapq
 import tempfile
 from sort import config
 
@@ -8,9 +7,7 @@ from sort import config
 class Big_Data_Sorter():
     def __init__(self, filenames):
         self.filenames = filenames
-        self.tmp_file_names = []
-        self.start_dir = os.getcwd()
-        self.tmp_dir = tempfile.mkdtemp()
+        self.tmp_files = []
         self.result_file = ''
         self.already_merged = 0
 
@@ -20,7 +17,6 @@ class Big_Data_Sorter():
         elif not sys.stdin.isatty():
             self.process_data(sys.stdin.readlines())
         self.merge_tmp_files()
-        self.delete_tmp_dir()
 
     def process_files(self):
         for filename in self.filenames:
@@ -28,7 +24,6 @@ class Big_Data_Sorter():
                 self.process_data(file)
 
     def process_data(self, data):
-        os.chdir(self.tmp_dir)
         current_lines, tmp_text = 0, ''
         for line in data:
             line = line.rstrip().replace('"', '').split('\\n')
@@ -43,13 +38,12 @@ class Big_Data_Sorter():
                 current_lines, tmp_text = 0, ''
         if tmp_text != '':
             self.process_tmp_file(tmp_text)
-        os.chdir(self.start_dir)
 
     def process_tmp_file(self, text):
-        with open(str(len(self.tmp_file_names)) + ".tmp", 'w') as tmp_file:
-            self.tmp_file_names.append(tmp_file.name)
-            tmp_text = self.sort_text(text)
-            tmp_file.write(tmp_text)
+        tmp_file = tempfile.TemporaryFile(mode='w+')
+        self.tmp_files.append(tmp_file)
+        tmp_text = self.sort_text(text)
+        tmp_file.write(tmp_text)
 
     def sort_text(self, text):
         tmp_text = text.split('\n')
@@ -57,52 +51,41 @@ class Big_Data_Sorter():
         return '\n'.join(tmp_text)
 
     def merge_tmp_files(self):
-        if len(self.tmp_file_names) == 1:
-            self.result_file = self.tmp_file_names[0]
+        if len(self.tmp_files) == 1:
+            self.result_file = self.tmp_files[0]
         else:
-            os.chdir(self.tmp_dir)
-            while len(self.tmp_file_names) - self.already_merged > 1:
-                count_of_merging = min(config.MERGE_FILES_COUNT, len(self.tmp_file_names) - self.already_merged)
+            while len(self.tmp_files) - self.already_merged > 1:
+                count_of_merging = min(config.MERGE_FILES_COUNT, len(self.tmp_files) - self.already_merged)
                 self.merge_part_of_tmp_files(count_of_merging)
                 self.already_merged += count_of_merging
-            os.chdir(self.start_dir)
 
     def merge_part_of_tmp_files(self, count):
-        result_file = open(str(len(self.tmp_file_names)) + ".txt", 'w')
-        self.tmp_file_names.append(result_file.name)
+        result_file = tempfile.TemporaryFile(mode='w+')
+        self.tmp_files.append(result_file)
 
         files = []
 
         for i in range(count):
-            with open(self.tmp_file_names[self.already_merged + i], 'r') as f:
-                tmp = list(reversed([line.replace('\n', '') for line in f.readlines()]))
-                tmp.sort()
-                files.append(tmp)
+            self.tmp_files[self.already_merged + i].seek(0, 0)
+            tmp = list(
+                reversed([line.replace('\n', '') for line in self.tmp_files[self.already_merged + i].readlines()]))
+
+            self.tmp_files[self.already_merged + i].seek(0, 0)
+            tmp.sort()
+            files.append(tmp)
         result = heapq.merge(*files)
         for line in result:
             result_file.write(line)
             result_file.write('\n')
-        self.result_file = result_file.name
-        result_file.close()
-
-    def delete_tmp_dir(self):  # pragma: no cover
-        self.make_result_file()
-        for i in self.tmp_file_names:
-            path = os.path.join(self.tmp_dir, i)
-            os.remove(path)
-        os.rmdir(self.tmp_dir)
+        self.result_file = result_file
 
     def make_result_file(self):  # pragma: no cover
-        os.chdir(self.tmp_dir)
-        with open(self.result_file, 'r') as result_file:
-            os.chdir(self.start_dir)
-            with open(config.RESULT_FILE_NAME, 'w') as input_file:
-                for line in result_file:
-                    input_file.write(line)
-        self.result_file = config.RESULT_FILE_NAME
+        input_file = tempfile.NamedTemporaryFile()
+        for line in self.result_file:
+            input_file.write(line)
+        self.result_file = input_file
 
     def print_res(self):  # pragma: no cover
-        with open(self.result_file, 'r') as file:
-            for line in file.readlines():
-                print(line.replace('\n', ''))
-        os.remove(self.result_file)
+        self.result_file.seek(0, 0)
+        for line in self.result_file.readlines():
+            print(line.replace('\n', ''))

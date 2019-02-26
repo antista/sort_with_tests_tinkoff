@@ -68,7 +68,7 @@ def test_stdin(mocker, data=('4\n7\n1\n0',)):
     mocker.patch('sys.stdin.readlines', return_value=data)
     mocker.patch('sort.big_data_sorter.Big_Data_Sorter.sort_text')
     mocker.patch('sort.big_data_sorter.Big_Data_Sorter.merge_tmp_files')
-    mocker.patch('sort.big_data_sorter.Big_Data_Sorter.delete_tmp_dir')
     mocker.patch('sort.big_data_sorter.Big_Data_Sorter.print_res')
+    mocker.patch('tempfile.TemporaryFile')
     sorter.sort([])
     big_data_sorter.Big_Data_Sorter.sort_text.assert_called_once_with(data[0])
